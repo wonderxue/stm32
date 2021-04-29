@@ -7,8 +7,3 @@
 **/*.uvprojx
 **/*.scvd
 **/.pio
-**/.vscode
-stm32_cube_freertos/
-usb/
-usb_keyboard/
-usb_mouse/
