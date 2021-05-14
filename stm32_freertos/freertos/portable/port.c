@@ -32,17 +32,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-
-/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
-standard names. */
-#define vPortSVCHandler    SVC_Handler
-#define xPortPendSVHandler PendSV_Handler
-
-/* IMPORTANT: This define is commented when used with STM32Cube firmware, when the timebase source is SysTick,
-              to prevent overwriting SysTick_Handler defined within STM32Cube HAL */
-
-#define xPortSysTickHandler SysTick_Handler
-
 /* For backward compatibility, ensure configKERNEL_INTERRUPT_PRIORITY is
  * defined.  The value should also ensure backward compatibility.
  * FreeRTOS.org versions prior to V4.4.0 did not include this definition. */
@@ -457,7 +446,6 @@ void xPortSysTickHandler( void )
         }
     }
     portENABLE_INTERRUPTS();
-    HAL_IncTick();
 }
 /*-----------------------------------------------------------*/
 

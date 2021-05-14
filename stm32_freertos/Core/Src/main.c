@@ -49,27 +49,25 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+static void AppTaskCreate(void)/* AppTask任务 */
+{
+while (1)
+    {
+        HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,RESET);
+        vTaskDelay(500);   /* 延时500个tick */
+        HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,SET);     
+        vTaskDelay(500);   /* 延时500个tick */		 		
+    }
+}
+
+ /* 创建任务句柄 */
+static TaskHandle_t AppTask_Handle = NULL;
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void task1()
-{
-  for(;;)
-  {
-    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
-    vTaskDelay(1000/portTICK_RATE_MS);
-  }
-}
-void task2()
-{
-  for(;;)
-  {
-    HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_RESET);
-    vTaskDelay(1000/portTICK_RATE_MS);
-  }
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -101,28 +99,24 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  xTaskHandle xHandle;
-  xTaskCreate(task1,"task1",256,NULL,3,&xHandle);
-  if(xHandle!=NULL)
-  {
-    vTaskDelete(xHandle);
-  }
-  vTaskDelay(1000/portTICK_RATE_MS);
-  vTaskStartScheduler(); 
-  // xTaskCreate(task2,"task2",256,NULL,3,&xHandle);
-  // if(xHandle!=NULL)
-  // {
-  //   vTaskDelete(xHandle);
-  // }
-  // vTaskDelay(1000/portTICK_RATE_MS);
+BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+xReturn = xTaskCreate((TaskFunction_t )AppTaskCreate,  /* 任务入口函数 */
+                        (const char*    )"AppTask",/* 任务名字 */
+                        (uint16_t       )512,  /* 任务栈大小 */
+                        (void*          )NULL,/* 任务入口函数参数 */
+                        (UBaseType_t    )1, /* 任务的优先级 */
+                        (TaskHandle_t*  )&AppTask_Handle);/* 任务控制块指针 */ 
+  /* 启动任务调度 */           
+  if(pdPASS == xReturn)
+    vTaskStartScheduler();   /* 启动任务，开启调度 */
+  else
+    return -1;  
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
-    // HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -171,6 +165,27 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+ /**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
