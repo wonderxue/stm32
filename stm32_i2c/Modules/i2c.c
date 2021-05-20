@@ -2,7 +2,8 @@
 unsigned char timeOut = 200;
 __attribute__((weak)) void i2cError(char *code)
 {
-//#warning redefine function i2cError may better
+    //#warning redefine function i2cError may better
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
     while (1)
         ;
 }
@@ -73,7 +74,7 @@ _Bool write(unsigned char data)
             SDA_H;             //拉高数据线
         else
             SDA_L;
-        data << 1; //数据左移一位
+        data = data << 1; //数据左移一位
         //开始发送数据
         SCL_H;
         i2cDelay(2);
@@ -85,7 +86,7 @@ _Bool write(unsigned char data)
 }
 unsigned char read(_Bool ack)
 {
-    unsigned char data; //接收到的数据
+    unsigned char data = 0; //接收到的数据
     SDA_In;
     for (int i = 0; i < 8; i++)
     {
@@ -95,7 +96,7 @@ unsigned char read(_Bool ack)
         SCL_H;        //主机开始读数据，从机不能再改变数据了，即改变SDA的电平
         if (SDA_Read) //接收到的是1
             data++;
-        data << 1;
+        data = data << 1;
         i2cDelay(1);
     }
     sendAck(ack);
@@ -169,13 +170,13 @@ unsigned char readRegByte(unsigned char fid, unsigned char reg_addr)
 {
     _Bool status;
     unsigned char data;
-    unsigned char dev_addr = fid << 1 + 1;
+    unsigned char dev_addr = fid << 1;
     start();
     status = write(dev_addr);
     if (status)
     {
         stop();
-        i2cError("read dev_addr error");
+        i2cError("read dev_addr1 error");
         return status;
     }
     status = write(reg_addr);
@@ -183,6 +184,14 @@ unsigned char readRegByte(unsigned char fid, unsigned char reg_addr)
     {
         stop();
         i2cError("read reg_addr error");
+        return status;
+    }
+    start();
+    status = write(dev_addr + 1);
+    if (status)
+    {
+        stop();
+        i2cError("read dev_addr2 error");
         return status;
     }
     data = read(1);

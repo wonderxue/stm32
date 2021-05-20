@@ -38,7 +38,8 @@ extern "C" {
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void SDAIn();
+void SDAOut();
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

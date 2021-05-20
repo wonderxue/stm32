@@ -55,7 +55,18 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void delay_us(int us)
+{
+  int count = 0xffff - us - 5;
+  HAL_TIM_Base_Start(&htim1);
+  __HAL_TIM_SetCounter(&htim1, count);
+  while (count < 0xffff - 5)
+  {
+    /* code */
+    count = __HAL_TIM_GetCounter(&htim1);
+  }
+  HAL_TIM_Base_Stop(&htim1);
+}
 /* USER CODE END 0 */
 
 /**
@@ -88,6 +99,22 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+  oled_init();
+  // oled_write_cmd(0xDA); //pin configuartion
+  // oled_write_cmd(0x00);
+  // oled_write_cmd(0xA8); //ratio 1-64
+  // oled_write_cmd(0x1F);
+  oled_on();
+  oled_cls();
+  oled_display_mode(0);
+  oled_write_cmd(0xA6);
+  HAL_Delay(500);
+  //OLED_ShowString(0, 0, (unsigned char *)"hhhh", 8);
+  float x, y, z;
+  char str[10];
+  //memset(str, 0, sizeof(str));
+  // 把浮点数ff转换为字符串，存放在strff中。
+  GY_Init();
 
   /* USER CODE END 2 */
 
@@ -96,7 +123,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+    x = GY_Read_Data(Data_Read.ACCEL_XOUT_H) / 16.3840;
+    //sprintf(str, "%.2f", x);
+    OLED_ShowNum(0, 0, x, 5, 8);
+    HAL_Delay(500);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -127,8 +157,7 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -159,7 +188,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
