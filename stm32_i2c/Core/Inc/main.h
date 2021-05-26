@@ -36,8 +36,7 @@ extern "C"
 #include "i2c.h"
 #include "oled.h"
 #include "mpu.h"
-#include "stdio.h"
-#include <string.h>
+#include "func.h"
   /* USER CODE END Includes */
 
   /* Exported types ------------------------------------------------------------*/

@@ -49,6 +49,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+extern void _oled_write_cmd(unsigned char data);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -99,15 +100,15 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  oled_init();
+  oledInit();
   // oled_write_cmd(0xDA); //pin configuartion
   // oled_write_cmd(0x00);
   // oled_write_cmd(0xA8); //ratio 1-64
   // oled_write_cmd(0x1F);
-  oled_on();
-  oled_cls();
-  oled_display_mode(0);
-  oled_write_cmd(0xA6);
+  oledOn();
+  oledCls();
+  oledDisplayMode(0);
+  _oled_write_cmd(0xA6);
   HAL_Delay(500);
   //OLED_ShowString(0, 0, (unsigned char *)"hhhh", 8);
   float x, y, z;
@@ -123,9 +124,15 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    x = GY_Read_Data(Data_Read.ACCEL_XOUT_H) / 16.3840;
-    //sprintf(str, "%.2f", x);
-    OLED_ShowNum(0, 0, x, 5, 8);
+    x = GY_Read_Data(Data_Read.ACCEL_XOUT_H) / 16384.0;
+    y=GY_Read_Data(Data_Read.ACCEL_YOUT_H) / 16384.0;
+    z=GY_Read_Data(Data_Read.ACCEL_ZOUT_H) / 16384.0;
+    floatToString(x,str,10);
+    oledShowString(0, 0, str, 8);
+    floatToString(y,str,10);
+    oledShowString(0, 1, str, 8);
+    floatToString(z,str,10);
+    oledShowString(0, 2, str, 8);
     HAL_Delay(500);
     /* USER CODE BEGIN 3 */
   }
